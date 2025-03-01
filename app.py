@@ -7,6 +7,7 @@ import time
 from functools import wraps
 from flask import request
 from flask_talisman import Talisman
+from sqlalchemy.dialects.postgresql import JSONB
 
 app = Flask(__name__)
 Talisman(app)
@@ -43,6 +44,8 @@ class License(db.Model):
     is_upgrade = db.Column(db.Boolean, nullable=False, default=False)
     upgrade_from_key = db.Column(db.String(), nullable=True)
     date = db.Column(db.DateTime(), nullable=True, onupdate=datetime.datetime.utcnow)
+    editions = db.Column(JSONB, nullable=True, default=lambda: {"en": "Full Edition"})
+    metadata = db.Column(JSONB, nullable=True)
 
     def to_json_dict(self):
         return {
@@ -62,7 +65,7 @@ class License(db.Model):
 @app.cli.command()
 def create_db():
     """This method simply creates some dummy licenses for demo purposes and inserts them into the database."""
-    db.create_all()
+    # db.create_all()
 
     license_1 = License(
         key="LICENSE_KEY_1",
@@ -86,10 +89,17 @@ def create_db():
         entity_id="595959595959595-User",
         date=datetime.datetime(year=2018,month=11,day=30)
     )
-
-    db.session.add(license_1)
-    db.session.add(license_2)
-    db.session.add(license_3)
+    license_4 = License(
+        key="BMO1-3KRI-LYEQ-VLIH-WKV7-OLJL-WJYX-BZIB-BCDR-EYHQ",
+        serial="3fb82fc8e-ba63-4127-9a76-2b482e33411e",
+        product_id="b5d4a226-ea77-4369-a19e-a67a53272365",
+        enabled=True
+    )
+# id: 1e998f78-ed97-4914-b7d8-352098c80b01
+# Base keys: 4014780378, 380133745, 218332758, 1574640581
+# key: RH50-VHXW-HV55-L4XL-6Q2G-K7HP-BYKF-O4QB-DQ62-DSWA
+    db.session.add(license_4)
+    # db.session.add(license_2)
     db.session.commit()
 
 
